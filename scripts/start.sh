@@ -82,6 +82,9 @@ else
  sed -i "s/expose_php = On/expose_php = Off/g" /etc/php5/conf.d/php.ini
 fi
 
+# Enable PHP Short Open Tag
+sed -i "s/short_open_tag = Off/short_open_tag = On/g" /etc/php5/conf.d/php.ini
+
 # Increase the memory_limit
 if [ ! -z "$PHP_MEM_LIMIT" ]; then
  sed -i "s/memory_limit = 128M/memory_limit = ${PHP_MEM_LIMIT}M/g" /etc/php5/conf.d/php.ini
