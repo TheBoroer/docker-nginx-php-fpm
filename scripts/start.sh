@@ -49,6 +49,14 @@ if [ ! -d "/var/www/html/.git" ]; then
    fi
    chown -Rf nginx.nginx /var/www/html
  fi
+else
+ if [ ! -z "$GIT_REPULL" ]; then
+   git rm -r --quiet --cached /var/www/html
+   git fetch --all -p
+   git reset HEAD --quiet
+   git pull
+   chown -Rf nginx.nginx /var/www/html
+ fi
 fi
 
 # Enable custom nginx config files if they exist
