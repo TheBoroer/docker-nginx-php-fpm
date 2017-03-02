@@ -60,12 +60,12 @@ else
 fi
 
 # Enable custom nginx config files if they exist
-if [ -f /var/www/html/conf/nginx/nginx-site.conf ]; then
-  cp /var/www/html/conf/nginx/nginx-site.conf /etc/nginx/sites-available/default.conf
+if [ -f /var/www/html/_conf/nginx/nginx-site.conf ]; then
+  cp /var/www/html/_conf/nginx/nginx-site.conf /etc/nginx/sites-available/default.conf
 fi
 
-if [ -f /var/www/html/conf/nginx/nginx-site-ssl.conf ]; then
-  cp /var/www/html/conf/nginx/nginx-site-ssl.conf /etc/nginx/sites-available/default-ssl.conf
+if [ -f /var/www/html/_conf/nginx/nginx-site-ssl.conf ]; then
+  cp /var/www/html/_conf/nginx/nginx-site-ssl.conf /etc/nginx/sites-available/default-ssl.conf
 fi
 
 # Display PHP error's or not
