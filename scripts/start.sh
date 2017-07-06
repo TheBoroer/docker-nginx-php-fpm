@@ -53,7 +53,7 @@ else
  if [ ! -z "$GIT_REPULL" ]; then
    git -C /var/www/html rm -r --quiet --cached /var/www/html
    git -C /var/www/html fetch --all -p
-   git -C /var/www/html reset HEAD --quiet
+   git -C /var/www/html reset --hard HEAD --quiet
    git -C /var/www/html pull
    chown -Rf nginx.nginx /var/www/html
  fi
