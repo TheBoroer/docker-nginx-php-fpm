@@ -4,7 +4,7 @@ MAINTAINER Boro <docker@bo.ro>
 
 ENV php_conf /etc/php5/php.ini
 ENV fpm_conf /etc/php5/php-fpm.conf
-ENV composer_hash 55d6ead61b29c7bdee5cccfb50076874187bd9f21f65d8991d46ec5cc90518f447387fb9f76ebae1fbbacf329e583e30 
+ENV composer_hash 669656bab3166a7aff8a7506b8cb2d1c292f042046c5a994c43155c0be6190fa0355160742ab2e1c88d40d5be660b410 
 
 #RUN echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
 RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
@@ -40,7 +40,6 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     php5-soap \
     php5-dom \
     php5-zip \
-    php5-redis@testing \
     python \
     python-dev \
     py-pip \
@@ -65,6 +64,10 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     mkdir -p /etc/letsencrypt/webrootauth && \
     apk del gcc musl-dev linux-headers libffi-dev augeas-dev python-dev
 
+# Install php5-redis package that's missing from the testing alpine branch
+RUN wget "https://github.com/IFSight/docker-php/raw/master/alpine/3.5/php56-sec/packages/php5-redis-2.2.8-r0.apk" && \
+    apk add --allow-untrusted php5-redis-2.2.8-r0.apk && \
+    rm -f php5-redis-2.2.8-r0.apk
 
 ADD conf/supervisord.conf /etc/supervisord.conf
 
