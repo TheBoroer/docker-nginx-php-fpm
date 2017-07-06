@@ -59,13 +59,19 @@ else
  fi
 fi
 
-# Enable custom nginx config files if they exist
+# Enable custom nginx config files if they exist (HTTP only)
 if [ -f /var/www/html/_conf/nginx/nginx-site.conf ]; then
   cp /var/www/html/_conf/nginx/nginx-site.conf /etc/nginx/sites-enabled/default.conf
 fi
 
-if [ -f /var/www/html/_conf/nginx/nginx-site-ssl.conf ]; then
-  cp /var/www/html/_conf/nginx/nginx-site-ssl.conf /etc/nginx/sites-enabled/default-ssl.conf
+# Enable custom php-fpm.conf file if it exists
+if [ -f /var/www/html/_conf/php/php-fpm.conf ]; then
+  cp /var/www/html/_conf/php/php-fpm.conf /etc/php7/php-fpm.conf
+fi
+
+# Enable custom php.ini file if it exists
+if [ -f /var/www/html/_conf/php/php.ini ]; then
+  cp /var/www/html/_conf/php/php.ini /etc/php7/php.ini
 fi
 
 # Display PHP error's or not
