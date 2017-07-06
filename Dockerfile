@@ -40,7 +40,6 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     php5-soap \
     php5-dom \
     php5-zip \
-    php5-redis@testing \
     python \
     python-dev \
     py-pip \
@@ -65,6 +64,10 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     mkdir -p /etc/letsencrypt/webrootauth && \
     apk del gcc musl-dev linux-headers libffi-dev augeas-dev python-dev
 
+# Install php5-redis package that's missing from the testing alpine branch
+RUN wget "https://github.com/IFSight/docker-php/raw/master/alpine/3.5/php56-sec/packages/php5-redis-2.2.8-r0.apk" && \
+    apk add --allow-untrusted php5-redis-2.2.8-r0.apk && \
+    rm -f php5-redis-2.2.8-r0.apk
 
 ADD conf/supervisord.conf /etc/supervisord.conf
 
