@@ -66,12 +66,13 @@ fi
 
 # Enable custom php-fpm.conf file if it exists
 if [ -f /var/www/html/_conf/php/php-fpm.conf ]; then
+  mv /etc/php5/php-fpm.conf /etc/php5/php-fpm.default.conf
   cp /var/www/html/_conf/php/php-fpm.conf /etc/php5/php-fpm.conf
-  
 fi
 
 # Enable custom php.ini file if it exists
 if [ -f /var/www/html/_conf/php/php.ini ]; then
+  mv /etc/php5/php.ini /etc/php5/php.default.ini
   cp /var/www/html/_conf/php/php.ini /etc/php5/php.ini
 fi
 
