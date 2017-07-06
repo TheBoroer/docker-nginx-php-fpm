@@ -59,7 +59,7 @@ else
  fi
 fi
 
-# Enable custom nginx config files if they exist
+# Enable custom nginx config files if they exist (HTTP only)
 if [ -f /var/www/html/_conf/nginx/nginx-site.conf ]; then
   cp /var/www/html/_conf/nginx/nginx-site.conf /etc/nginx/sites-enabled/default.conf
 fi
