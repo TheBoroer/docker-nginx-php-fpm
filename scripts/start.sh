@@ -69,14 +69,14 @@ fi
 
 # Enable custom php-fpm.conf file if it exists
 if [ -f /var/www/html/_conf/php/php-fpm.conf ]; then
-  mv /etc/php7/php-fpm.conf /etc/php7/php-fpm.default.conf
-  cp /var/www/html/_conf/php/php-fpm.conf /etc/php7/php-fpm.conf
+  mv /usr/local/etc/php-fpm.conf /usr/local/etc/php-fpm.default.conf
+  cp /var/www/html/_conf/php/php-fpm.conf /usr/local/etc/php-fpm.conf
 fi
 
 # Enable custom php.ini file if it exists
 if [ -f /var/www/html/_conf/php/php.ini ]; then
-  mv /etc/php7/php.ini /etc/php7/php.ini
-  cp /var/www/html/_conf/php/php.ini /etc/php7/php.ini
+  mv /usr/local/etc/php/conf.d/php.ini /usr/local/etc/php/conf.d/php.ini
+  cp /var/www/html/_conf/php/php.ini /usr/local/etc/php/conf.d/php.ini
 
 # Try auto install for composer
 if [ -f "/var/www/html/composer.lock" ]; then
