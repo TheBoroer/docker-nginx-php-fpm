@@ -77,6 +77,7 @@ fi
 if [ -f /var/www/html/_conf/php/php.ini ]; then
   mv /usr/local/etc/php/conf.d/php.ini /usr/local/etc/php/conf.d/php.ini
   cp /var/www/html/_conf/php/php.ini /usr/local/etc/php/conf.d/php.ini
+fi
 
 # Try auto install for composer
 if [ -f "/var/www/html/composer.lock" ]; then
