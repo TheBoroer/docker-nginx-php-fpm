@@ -1,36 +1,30 @@
-## Introduction
-This is a Dockerfile to build a container image for nginx and php-fpm, with the ability to pull website code from git. The container also has the ability to update templated files with variables passed to docker in order to update your settings. There is also support for lets encrypt SSL support.
+![docker hub](https://img.shields.io/docker/pulls/richarvey/nginx-php-fpm.svg?style=flat-square)
+![docker hub](https://img.shields.io/docker/stars/richarvey/nginx-php-fpm.svg?style=flat-square)
+![Travis](https://img.shields.io/travis/ngineered/nginx-php-fpm.svg?style=flat-square)
 
-### Git repository
-The source files for this project can be found here: [https://github.com/ngineered/nginx-php-fpm](https://github.com/ngineered/nginx-php-fpm)
+## Overview
+This is a Dockerfile/image to build a container for nginx and php-fpm, with the ability to pull website code from git when the container is created, as well as allowing the container to push and pull changes to the code to and from git. The container also has the ability to update templated files with variables passed to docker in order to update your code and settings. There is support for lets encrypt SSL configurations, custom nginx configs, core nginx/PHP variable overrides for running preferences, X-Forwarded-For headers and UID mapping for local volume support.
 
-If you have any improvements please submit a pull request.
-### Docker hub repository
-The Docker hub build can be found here: [https://registry.hub.docker.com/u/richarvey/nginx-php-fpm/](https://registry.hub.docker.com/u/richarvey/nginx-php-fpm/)
-## Versions
-| Tag | Nginx | PHP | Alpine |
-|-----|-------|-----|--------|
-| latest | 1.11.5 | 5.6.27 | 3.4 |
-| php5 | 1.11.5 | 5.6.27 | 3.4 |
-| php7 | 1.11.5 | 7.0.12 | 3.4 |
+If you have improvements or suggestions please open an issue or pull request on the GitHub project page.
 
-## Building from source
-To build from source you need to clone the git repo and run docker build:
-```
-git clone https://github.com/ngineered/nginx-php-fpm
-.git
-docker build -t nginx-php-fpm:latest .
-```
+### Versioning
+| Docker Tag | GitHub Release | Nginx Version | PHP Version | Alpine Version |
+|-----|-------|-----|--------|--------|
+| php7 | php7 Branch |1.13.1 | 7.1.6 | 3.4 |
 
-## Pulling from Docker Hub
+### Links
+- [https://github.com/ngineered/nginx-php-fpm](https://github.com/ngineered/nginx-php-fpm)
+- [https://registry.hub.docker.com/u/richarvey/nginx-php-fpm/](https://registry.hub.docker.com/u/richarvey/nginx-php-fpm/)
+
+## Quick Start
+To pull from docker hub:
 ```
 docker pull richarvey/nginx-php-fpm
 ```
-
-## Running
+### Running
 To simply run the container:
 ```
-sudo docker run -d richarvey/nginx-php-fpm
+sudo docker run -d boro/nginx-php-fpm:php7
 ```
 
 You can then browse to ```http://<DOCKER_HOST>``` to view the default install files. To find your ```DOCKER_HOST``` use the ```docker inspect``` to get the IP address.
@@ -55,11 +49,17 @@ The following flags are a list of all the currently supported options that can b
  - **RUN_SCRIPTS** : Set to 1 to execute scripts
 
 ### Dynamically Pulling code from git
-One of the nice features of this container is its ability to pull code from a git repository with a couple of environmental variables passed at run time. Please take a look at our recommended [repo layout guidelines](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/repo_layout.md).
 
-There are two methods of pulling code from git, you can either use a Personal Token (recommended method) or an SSH key.
+To dynamically pull code from git (master branch) when starting:
+```
+docker run -d -e 'GIT_EMAIL=email_address' -e 'GIT_NAME=full_name' -e 'GIT_USERNAME=git_username' -e 'GIT_REPO=github.com/project' -e 'GIT_PERSONAL_TOKEN=<long_token_string_here>' boro/nginx-php-fpm:php7
+```
 
-**Note:** We would recommend using a git personal token over an SSH key as it simplifies the set up process. To create a personal access token on Github follow this [guide](https://help.github.com/articles/creating-an-access-token-for-command-line-use/).
+To pull a repository and specify a branch add the __GIT_BRANCH__ environment variable:
+```
+docker run -d -e 'GIT_EMAIL=email_address' -e 'GIT_NAME=full_name' -e 'GIT_USERNAME=git_username' -e 'GIT_REPO=github.com/project' -e 'GIT_PERSONAL_TOKEN=<long_token_string_here>' -e 'GIT_BRANCH=stage' richarvey/nginx-php-fpm:latest
+```
+
 
 #### Personal Access token
 
@@ -67,43 +67,12 @@ You can pass the container your personal access token from your git account usin
 
 Since the access token acts as a password with limited access, the git push/pull uses HTTPS to authenticate. You will need to specify your __GIT_USERNAME__ and __GIT_PERSONAL_TOKEN__ variables to push and pull. You'll need to also have the __GIT_EMAIL__, __GIT_NAME__ and __GIT_REPO__ common variables defined.
 
-```
-docker run -d -e 'GIT_EMAIL=email_address' -e 'GIT_NAME=full_name' -e 'GIT_USERNAME=git_username' -e 'GIT_REPO=github.com/project' -e 'GIT_PERSONAL_TOKEN=<long_token_string_here>' richarvey/nginx-php-fpm:latest
-```
-
-To pull a repository and specify a branch add the __GIT_BRANCH__ environment variable:
-```
-docker run -d -e 'GIT_EMAIL=email_address' -e 'GIT_NAME=full_name' -e 'GIT_USERNAME=git_username' -e 'GIT_REPO=github.com/project' -e 'GIT_PERSONAL_TOKEN=<long_token_string_here>' -e 'GIT_BRANCH=stage' richarvey/nginx-php-fpm:latest
-```
-#### SSH keys
-
-##### Preparing your SSH key
-The container has the option for you to pass it the __SSH_KEY__ variable with a **base64** encoded private key. First generate your key and then make sure to add it to github and give it write permissions if you want to be able to push code from the container. Then run:
-```
-base64 -w 0 /path_to_your_key
-```
-**Note:** Copy the output, but be careful not to copy your prompt
-
-##### Running with SSH Keys
-
-To run the container and pull code simply specify the GIT_REPO URL including *git@* and then make sure you have also supplied your base64 version of your ssh deploy key:
-```
-sudo docker run -d -e 'GIT_NAME=full_name' -e 'GIT_USERNAME=git_username' -e 'GIT_REPO=github.com/project' -e 'SSH_KEY=BIG_LONG_BASE64_STRING_GOES_IN_HERE' richarvey/nginx-php-fpm:latest
-```
-
-To pull a repository and specify a branch add the GIT_BRANCH environment variable:
-```
-sudo docker run -d -e 'GIT_NAME=full_name' -e 'GIT_USERNAME=git_username' -e 'GIT_REPO=github.com/project' -e 'SSH_KEY=BIG_LONG_BASE64_STRING_GOES_IN_HERE' -e 'GIT_BRANCH=stage' richarvey/nginx-php-fpm:latest
-```
-
 ### Custom Nginx Config files
 Sometimes you need a custom config file for nginx to achieve this read the [Nginx config guide](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/nginx_configs.md) 
 
 ### Scripting and Templating
 Please see the [Scripting and templating guide](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/scripting_templating.md) for more details.
 
-### Lets Encrypt support
-This container includes support to easily manage lets encrypt certificates. Please see the [Lets Encrypt guide](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/lets_encrypt.md) for more details.
 
 ## Special Git Features
 Specify the ```GIT_EMAIL``` and ```GIT_NAME``` variables for this to work. They are used to set up git correctly and allow the following commands to work.
@@ -126,5 +95,34 @@ All logs should now print out in stdout/stderr and are available via the docker 
 ```
 docker logs <CONTAINER_NAME>
 ```
-### WebRoot
-You can set your webroot in the container to anything you want using the ```WEBROOT``` variable e.g -e "WEBROOT=/var/www/html/public". By default code is checked out into /var/www/html/ so if your git repository does not have code in the root you'll need to use this variable.
+
+You can then browse to ```http://<DOCKER_HOST>``` to view the default install files. To find your ```DOCKER_HOST``` use the ```docker inspect``` to get the IP address (normally 172.17.0.2)
+
+For more detailed examples and explanations please refer to the documentation.
+## Documentation
+
+- [Building from source](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/building.md)
+- [Versioning](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/versioning.md)
+- [Config Flags](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/config_flags.md)
+- [Git Auth](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/git_auth.md)
+ - [Personal Access token](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/git_auth.md#personal-access-token)
+ - [SSH Keys](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/git_auth.md#ssh-keys)
+- [Git Commands](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/git_commands.md)
+ - [Push](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/git_commands.md#push-code-to-git)
+ - [Pull](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/git_commands.md#pull-code-from-git-refresh)
+- [Repository layout / webroot](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/repo_layout.md)
+ - [webroot](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/repo_layout.md#src--webroot)
+- [User / Group Identifiers](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/UID_GID_Mapping.md)
+- [Custom Nginx Config files](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/nginx_configs.md)
+ - [REAL IP / X-Forwarded-For Headers](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/nginx_configs.md#real-ip--x-forwarded-for-headers)
+- [Scripting and Templating](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/scripting_templating.md)
+ - [Environment Variables](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/scripting_templating.md#using-environment-variables--templating)
+- [Lets Encrypt Support](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/lets_encrypt.md)
+ - [Setup](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/lets_encrypt.md#setup)
+ - [Renewal](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/lets_encrypt.md#renewal)
+- [PHP Modules](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/php_modules.md)
+- [Logging and Errors](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/logs.md)
+
+## Guides
+- [Running in Kubernetes](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/guides/kubernetes.md)
+- [Using Docker Compose](https://github.com/ngineered/nginx-php-fpm/blob/master/docs/guides/docker_compose.md)
