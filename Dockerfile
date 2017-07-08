@@ -74,7 +74,7 @@ RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.4/main' >> /etc/apk/repositori
     apk add libssh2==1.7.0-r0 --no-cache && \
     apk add libcurl==7.52.1-r3 --no-cache && \
     apk add curl==7.52.1-r3 --no-cache && \
-    apk add git==2.8.3-r0 --no-cache
+    apk add git==2.11.2-r0 --no-cache
 
 # Install php5-redis package that's missing from the testing alpine branch
 RUN wget "https://github.com/IFSight/docker-php/raw/master/alpine/3.5/php56-sec/packages/php5-redis-2.2.8-r0.apk" && \
