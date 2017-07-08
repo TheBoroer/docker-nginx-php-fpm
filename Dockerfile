@@ -6,9 +6,10 @@ ENV php_conf /etc/php5/php.ini
 ENV fpm_conf /etc/php5/php-fpm.conf
 ENV composer_hash 669656bab3166a7aff8a7506b8cb2d1c292f042046c5a994c43155c0be6190fa0355160742ab2e1c88d40d5be660b410 
 
-# For nghttp2-dev, we need this respository.
+# For nghttp2-dev, we need this respository. + CURL with OpenSSL Support
 RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
 RUN apk add --update --no-cache openssl@testing openssl-dev@testing nghttp2-dev@testing ca-certificates@testing
+ENV CURL_VERSION 7.54.1
 RUN apk add --update --no-cache --virtual curldeps g++ make perl && \
     wget https://curl.haxx.se/download/curl-$CURL_VERSION.tar.bz2 && \
     tar xjvf curl-$CURL_VERSION.tar.bz2 && \
