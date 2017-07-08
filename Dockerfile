@@ -6,42 +6,15 @@ ENV php_conf /etc/php5/php.ini
 ENV fpm_conf /etc/php5/php-fpm.conf
 ENV composer_hash 669656bab3166a7aff8a7506b8cb2d1c292f042046c5a994c43155c0be6190fa0355160742ab2e1c88d40d5be660b410 
 
-# For nghttp2-dev, we need this respository. + CURL with OpenSSL Support
-RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
-RUN apk add --update --no-cache openssl@testing openssl-dev@testing nghttp2-dev@testing ca-certificates@testing
-ENV CURL_VERSION 7.54.1
-RUN apk add --update --no-cache --virtual curldeps g++ make perl && \
-    wget https://curl.haxx.se/download/curl-$CURL_VERSION.tar.bz2 && \
-    tar xjvf curl-$CURL_VERSION.tar.bz2 && \
-    rm curl-$CURL_VERSION.tar.bz2 && \
-    cd curl-$CURL_VERSION && \
-    ./configure \
-        --with-nghttp2=/usr \
-        --prefix=/usr \
-        --with-ssl \
-        --enable-ipv6 \
-        --enable-unix-sockets \
-        --without-libidn \
-        --disable-static \
-        --disable-ldap \
-        --with-pic && \
-    make && \
-    make install && \
-    cd / && \
-    rm -r curl-$CURL_VERSION && \
-    rm -r /var/cache/apk && \
-    rm -r /usr/share/man && \
-    apk del curldeps
-
-#RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
-#RUN echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
-RUN echo /etc/apk/respositories && \
+RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
+    echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
+    echo /etc/apk/respositories && \
     apk update && \
     apk add --no-cache bash \
     openssh-client \
     wget \
     supervisor \
-    #curl \
+    curl \
     git \
     php5-fpm \
     php5-pdo \
@@ -71,9 +44,8 @@ RUN echo /etc/apk/respositories && \
     python-dev \
     py-pip \
     augeas-dev \
-    #openssl-dev@testing \
-    #ca-certificates@testing \
-    #nghttp2-dev@testing \
+    openssl-dev \
+    ca-certificates \
     dialog \
     gcc \
     musl-dev \
@@ -91,6 +63,18 @@ RUN echo /etc/apk/respositories && \
     pip install -U certbot && \
     mkdir -p /etc/letsencrypt/webrootauth && \
     apk del gcc musl-dev linux-headers libffi-dev augeas-dev python-dev
+
+# Downgrade to alpine 3.4's curl and libssl/openssl (https://github.com/docker-library/official-images/issues/2773)
+RUN echo 'http://dl-cdn.alpinelinux.org/alpine/v3.4/main' >> /etc/apk/repositories && \
+    apk update && \
+    apk del curl && \
+    apk del git && \
+    apk del libcurl && \
+    apk del libssh2 && \
+    apk add libssh2==1.7.0-r0 --no-cache && \
+    apk add libcurl==7.52.1-r1 --no-cache && \
+    apk add curl==7.52.1-r1 --no-cache && \
+    apk add git==2.8.3-r0 --no-cache
 
 # Install php5-redis package that's missing from the testing alpine branch
 RUN wget "https://github.com/IFSight/docker-php/raw/master/alpine/3.5/php56-sec/packages/php5-redis-2.2.8-r0.apk" && \
