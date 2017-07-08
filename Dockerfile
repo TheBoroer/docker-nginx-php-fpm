@@ -6,15 +6,41 @@ ENV php_conf /etc/php5/php.ini
 ENV fpm_conf /etc/php5/php-fpm.conf
 ENV composer_hash 669656bab3166a7aff8a7506b8cb2d1c292f042046c5a994c43155c0be6190fa0355160742ab2e1c88d40d5be660b410 
 
+# For nghttp2-dev, we need this respository.
+RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
+RUN apk add --update --no-cache openssl@testing openssl-dev@testing nghttp2-dev@testing ca-certificates@testing
+RUN apk add --update --no-cache --virtual curldeps g++ make perl && \
+    wget https://curl.haxx.se/download/curl-$CURL_VERSION.tar.bz2 && \
+    tar xjvf curl-$CURL_VERSION.tar.bz2 && \
+    rm curl-$CURL_VERSION.tar.bz2 && \
+    cd curl-$CURL_VERSION && \
+    ./configure \
+        --with-nghttp2=/usr \
+        --prefix=/usr \
+        --with-ssl \
+        --enable-ipv6 \
+        --enable-unix-sockets \
+        --without-libidn \
+        --disable-static \
+        --disable-ldap \
+        --with-pic && \
+    make && \
+    make install && \
+    cd / && \
+    rm -r curl-$CURL_VERSION && \
+    rm -r /var/cache/apk && \
+    rm -r /usr/share/man && \
+    apk del curldeps
+
+#RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories
 #RUN echo @edge http://nl.alpinelinux.org/alpine/edge/main >> /etc/apk/repositories && \
-RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
-    echo /etc/apk/respositories && \
+RUN echo /etc/apk/respositories && \
     apk update && \
     apk add --no-cache bash \
     openssh-client \
     wget \
     supervisor \
-    curl \
+    #curl \
     git \
     php5-fpm \
     php5-pdo \
@@ -44,8 +70,9 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     python-dev \
     py-pip \
     augeas-dev \
-    openssl-dev \
-    ca-certificates \
+    #openssl-dev@testing \
+    #ca-certificates@testing \
+    #nghttp2-dev@testing \
     dialog \
     gcc \
     musl-dev \
