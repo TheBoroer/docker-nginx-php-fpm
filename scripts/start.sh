@@ -5,6 +5,20 @@
 mkdir -p -m 0700 /root/.ssh
 echo -e "Host *\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
 
+#disable ipv6 since Docker Cloud doesn't support it yet and alpine nslookups randomly resolve with ipv6 addresses.
+echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+echo "ipv6" >> /etc/modules
+
+# FIX: Slow DNS issues on docker v1.11.x (Weird issues like these: https://github.com/moby/moby/issues/22185)
+# force dns lookups to happen over TCP and add google dns and OVH dns as backup nameservers
+# (OVH dns is only accessible if container is run within the OVH infrastructure)
+sed -n '1p' /etc/resolv.conf | tee /etc/resolv.conf
+echo "nameserver 127.0.0.11" >> /etc/resolv.conf
+echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+echo "nameserver 8.8.4.4" >> /etc/resolv.conf
+echo "nameserver 213.186.33.99" >> /etc/resolv.conf
+echo "options use-vc ndots:0" >> /etc/resolv.conf
+
 if [[ "$GIT_USE_SSH" == "1" ]] ; then
   echo -e "Host *\n\tUser ${GIT_USERNAME}\n\n" >> /root/.ssh/config
 fi
