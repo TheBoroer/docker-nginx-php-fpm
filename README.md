@@ -10,7 +10,7 @@ If you have improvements or suggestions please open an issue or pull request on 
 ### Versioning
 | Docker Tag | GitHub Release | Nginx Version | PHP Version | Alpine Version |
 |-----|-------|-----|--------|--------|
-| php7 | php7 Branch |1.13.1 | 7.1.6 | 3.4 |
+| php7 | php7 Branch | 1.17.8 | 7.3.13 | 3.11 |
 
 ### Links
 - [https://github.com/ngineered/nginx-php-fpm](https://github.com/ngineered/nginx-php-fpm)
