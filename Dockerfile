@@ -1,4 +1,4 @@
-FROM php:7.1.6-fpm-alpine
+FROM php:7.3.13-fpm-alpine
 
 MAINTAINER Boro <docker@bo.ro>
 
@@ -6,7 +6,7 @@ ENV php_conf /usr/local/etc/php-fpm.conf
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
 
-ENV NGINX_VERSION 1.13.1
+ENV NGINX_VERSION 1.17.8
 
 RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   && CONFIG="\
@@ -229,7 +229,7 @@ ADD conf/php.ini /usr/local/etc/php/conf.d/php.ini
 #    find /etc/php7/conf.d/ -name "*.ini" -exec sed -i -re 's/^(\s*)#(.*)/\1;\2/g' {} \;
 
 # Install Mail PEAR Package
-RUN pear install --alldeps Mail
+RUN pear install --alldeps Mail Mail_Mime
 
 # Add Scripts
 ADD scripts/start.sh /start.sh
