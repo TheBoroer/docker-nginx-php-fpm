@@ -229,7 +229,7 @@ ADD conf/php.ini /usr/local/etc/php/conf.d/php.ini
 #    find /etc/php7/conf.d/ -name "*.ini" -exec sed -i -re 's/^(\s*)#(.*)/\1;\2/g' {} \;
 
 # Install Mail PEAR Package
-RUN pear install --alldeps Mail
+RUN pear install --alldeps Mail Mail_Mime
 
 # Add Scripts
 ADD scripts/start.sh /start.sh
