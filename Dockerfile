@@ -1,4 +1,4 @@
-FROM php:7.3.13-fpm-alpine
+FROM php:8.2.35-fpm-alpine
 
 MAINTAINER Boro <docker@bo.ro>
 
@@ -6,16 +6,9 @@ ENV php_conf /usr/local/etc/php-fpm.conf
 ENV fpm_conf /usr/local/etc/php-fpm.d/www.conf
 ENV php_vars /usr/local/etc/php/conf.d/docker-vars.ini
 
-ENV NGINX_VERSION 1.17.8
-ENV LUA_MODULE_VERSION 0.10.14
-ENV DEVEL_KIT_MODULE_VERSION 0.3.0
-ENV LUAJIT_LIB=/usr/lib
-ENV LUAJIT_INC=/usr/include/luajit-2.1
+ENV NGINX_VERSION 1.30.6
 
-ENV LD_PRELOAD /usr/lib/preloadable_libiconv.so php
-RUN apk add --no-cache --repository http://dl-3.alpinelinux.org/alpine/edge/community gnu-libiconv
-
-RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
+RUN GPG_KEYS=D6786CE303D9A9022998DC6CC8464D549AF75C0A \
   && CONFIG="\
     --prefix=/etc/nginx \
     --sbin-path=/usr/sbin/nginx \
@@ -67,7 +60,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
     gcc \
     libc-dev \
     make \
-    libressl-dev \
+    openssl-dev \
     pcre-dev \
     zlib-dev \
     linux-headers \
@@ -77,17 +70,13 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
     gd-dev \
     libmaxminddb-dev \
     perl-dev \
-    luajit-dev \
-  && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
-  && curl -fSL http://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
-  && curl -fSL https://github.com/simpl/ngx_devel_kit/archive/v$DEVEL_KIT_MODULE_VERSION.tar.gz -o ndk.tar.gz \
-  && curl -fSL https://github.com/openresty/lua-nginx-module/archive/v$LUA_MODULE_VERSION.tar.gz -o lua.tar.gz \
+  && curl -fSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz -o nginx.tar.gz \
+  && curl -fSL https://nginx.org/download/nginx-$NGINX_VERSION.tar.gz.asc  -o nginx.tar.gz.asc \
   && export GNUPGHOME="$(mktemp -d)" \
   && found=''; \
   for server in \
-    ha.pool.sks-keyservers.net \
+    hkps://keyserver.ubuntu.com \
     hkp://keyserver.ubuntu.com:80 \
-    hkp://p80.pool.sks-keyservers.net:80 \
     pgp.mit.edu \
   ; do \
     echo "Fetching GPG key $GPG_KEYS from $server"; \
@@ -98,9 +87,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   #&& rm -r "$GNUPGHOME" nginx.tar.gz.asc \
   && mkdir -p /usr/src \
   && tar -zxC /usr/src -f nginx.tar.gz \
-  && tar -zxC /usr/src -f ndk.tar.gz \
-  && tar -zxC /usr/src -f lua.tar.gz \
-  && rm nginx.tar.gz ndk.tar.gz lua.tar.gz \ 
+  && rm nginx.tar.gz \
   && cd /usr/src/nginx-$NGINX_VERSION \
   && ./configure $CONFIG --with-debug \
   && make -j$(getconf _NPROCESSORS_ONLN) \
@@ -148,10 +135,7 @@ RUN GPG_KEYS=B0F4253373F8F6F510D42178520A9993A1C052F8 \
   && ln -sf /dev/stdout /var/log/nginx/access.log \
   && ln -sf /dev/stderr /var/log/nginx/error.log
 
-RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repositories && \
-#    sed -i -e "s/v3.4/edge/" /etc/apk/repositories && \
-    echo /etc/apk/respositories && \
-    apk update && \
+RUN apk update && \
     apk add --no-cache bash \
     openssh-client \
     wget \
@@ -166,8 +150,8 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     python3 \
     python3-dev \
     augeas-dev \
-    libressl-dev \
     ca-certificates \
+    certbot \
     dialog \
     autoconf \
     make \
@@ -185,14 +169,12 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     libjpeg-turbo-dev \
     postgresql-dev && \
     docker-php-ext-configure gd \
-      --with-gd \
-      --with-freetype-dir=/usr/include/ \
-      --with-png-dir=/usr/include/ \
-      --with-jpeg-dir=/usr/include/ && \
+      --with-freetype \
+      --with-jpeg && \
     #curl iconv session
     #docker-php-ext-install pdo_mysql pdo_sqlite mysqli mcrypt gd exif intl xsl json soap dom zip opcache && \
-    docker-php-ext-install iconv pdo_mysql pdo_sqlite pgsql pdo_pgsql mysqli gd exif intl xsl json soap dom zip opcache && \
-    pecl install xdebug-2.7.2 && \
+    docker-php-ext-install pdo_mysql pdo_sqlite pgsql pdo_pgsql mysqli gd exif intl xsl soap dom zip opcache && \
+    pecl install xdebug-3.5.3 && \
     pecl install -o -f redis && \
     echo "extension=redis.so" > /usr/local/etc/php/conf.d/redis.ini && \
     docker-php-source delete && \
@@ -203,8 +185,6 @@ RUN echo @testing http://nl.alpinelinux.org/alpine/edge/testing >> /etc/apk/repo
     php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --quiet --install-dir=/usr/bin --filename=composer && \
     rm composer-setup.php && \
-    pip3 install -U pip && \
-    pip3 install -U certbot && \
     mkdir -p /etc/letsencrypt/webrootauth && \
     apk del gcc musl-dev linux-headers libffi-dev augeas-dev python3-dev make autoconf
 
