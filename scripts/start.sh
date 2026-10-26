@@ -5,6 +5,10 @@
 mkdir -p -m 0700 /root/.ssh
 echo -e "Host *\n\tStrictHostKeyChecking no\n" >> /root/.ssh/config
 
+# php-fpm.conf points session.save_path here; PHP won't create it, so sessions fail without it
+mkdir -p -m 0700 /tmp/php/session_save_path
+chown nginx:nginx /tmp/php/session_save_path
+
 #disable ipv6 since Docker Cloud doesn't support it yet and alpine nslookups randomly resolve with ipv6 addresses.
 echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
 echo "ipv6" >> /etc/modules
