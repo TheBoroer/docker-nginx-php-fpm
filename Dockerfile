@@ -1,4 +1,4 @@
-FROM php:8.2.35-fpm-alpine
+FROM php:8.5.12-fpm-alpine
 
 MAINTAINER Boro <docker@bo.ro>
 
@@ -173,7 +173,7 @@ RUN apk update && \
       --with-jpeg && \
     #curl iconv session
     #docker-php-ext-install pdo_mysql pdo_sqlite mysqli mcrypt gd exif intl xsl json soap dom zip opcache && \
-    docker-php-ext-install pdo_mysql pdo_sqlite pgsql pdo_pgsql mysqli gd exif intl xsl soap dom zip opcache && \
+    docker-php-ext-install pdo_mysql pdo_sqlite pgsql pdo_pgsql mysqli gd exif intl xsl soap zip && \
     pecl install xdebug-3.5.3 && \
     pecl install -o -f redis && \
     echo "extension=redis.so" > /usr/local/etc/php/conf.d/redis.ini && \
