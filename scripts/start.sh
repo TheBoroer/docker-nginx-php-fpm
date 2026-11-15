@@ -49,6 +49,10 @@ if [ ! -z "$GIT_NAME" ]; then
  git config --global push.default simple
 fi
 
+# The webroot is owned by nginx but git runs as root, which git rejects as
+# "dubious ownership" unless the directory is marked safe
+git config --global --replace-all safe.directory /var/www/html
+
 # Dont pull code down if the .git folder exists
 if [ ! -d "/var/www/html/.git" ]; then
  # Pull down code from git for our site!
@@ -68,7 +72,7 @@ if [ ! -d "/var/www/html/.git" ]; then
        git clone https://${GIT_USERNAME}:${GIT_PERSONAL_TOKEN}@${GIT_REPO} /var/www/html
      fi
    fi
-   chown -Rf nginx.nginx /var/www/html
+   chown -Rf nginx:nginx /var/www/html
  fi
 else
  if [ ! -z "$GIT_REPULL" ]; then
@@ -76,7 +80,7 @@ else
    git -C /var/www/html fetch --all -p
    git -C /var/www/html reset --hard HEAD --quiet
    git -C /var/www/html pull
-   chown -Rf nginx.nginx /var/www/html
+   chown -Rf nginx:nginx /var/www/html
  fi
 fi
 
@@ -152,7 +156,7 @@ if [ ! -z "$PUID" ]; then
   adduser -D -S -h /var/cache/nginx -s /sbin/nologin -G nginx -u ${PUID} nginx
 else
   # Always chown webroot for better mounting
-  chown -Rf nginx.nginx /var/www/html
+  chown -Rf nginx:nginx /var/www/html
 fi
 
 # Run custom scripts
